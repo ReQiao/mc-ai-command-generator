@@ -1,26 +1,53 @@
-# 依赖
+# Dependencies
 node_modules/
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
 
-# 构建产物
-out/
-dist/
-release/
-
-# Electron / Vite 缓存
-.vite/
-
-# 环境变量（含 API key / 收费密钥）——绝不入库
+# Environment
 .env
 .env.local
 .env.*.local
 
-# Mod 构建产物
-mod/build/
-mod/.gradle/
-mod/run/
+# Build outputs
+/out
+/dist
+dist/
+build/
 
-# 编辑器 / 系统
-.DS_Store
-*.log
-.idea/
+# IDE
 .vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Gradle (Mod)
+mod/.gradle/
+mod/build/
+mod/bin/
+mod/.classpath
+mod/.project
+mod/.settings/
+
+# Minecraft
+minecraft/
+.minecraft/
+run/
