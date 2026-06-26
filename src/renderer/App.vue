@@ -62,7 +62,7 @@ async function sendAll() {
   const cmds = results.value.map((r) => r.command).filter((c): c is string => !!c);
   if (!cmds.length) return;
   const res = await window.mcai.sendToMod(cmds);
-  const failed = res.filter((r) => !r.ok);
+  const failed = res.filter((r: any) => !r.ok);
   if (failed.length) {
     error.value = `下发 Mod 失败 ${failed.length}/${res.length} 条：${failed[0]?.message ?? ""}`;
   } else {
