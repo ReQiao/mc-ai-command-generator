@@ -1,0 +1,19 @@
+appId: com.reqiao.mcai
+productName: MC AI 指令生成器
+directories:
+  output: release
+  buildResources: build
+files:
+  - out/**/*
+  - package.json
+win:
+  target:
+    - nsis
+  artifactName: ${productName}-${version}-setup.${ext}
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+mac:
+  target: dmg
+linux:
+  target: AppImage

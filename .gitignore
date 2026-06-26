@@ -1,0 +1,26 @@
+# 依赖
+node_modules/
+
+# 构建产物
+out/
+dist/
+release/
+
+# Electron / Vite 缓存
+.vite/
+
+# 环境变量（含 API key / 收费密钥）——绝不入库
+.env
+.env.local
+.env.*.local
+
+# Mod 构建产物
+mod/build/
+mod/.gradle/
+mod/run/
+
+# 编辑器 / 系统
+.DS_Store
+*.log
+.idea/
+.vscode/

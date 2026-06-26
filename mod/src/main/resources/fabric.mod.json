@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "mc-ai-bridge",
+  "version": "${version}",
+  "name": "MC AI Bridge",
+  "description": "本地 HTTP 桥：接收 mc-ai-command-generator 桌面端下发的命令，在客户端执行。纯接收端，无业务逻辑。",
+  "authors": ["ReQiao"],
+  "contact": {
+    "homepage": "https://github.com/ReQiao/mc-ai-command-generator",
+    "sources": "https://github.com/ReQiao/mc-ai-command-generator"
+  },
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["com.reqiao.mcai.bridge.McAiBridgeClient"]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "~1.21.1",
+    "java": ">=21",
+    "fabric-language-kotlin": "*"
+  }
+}
