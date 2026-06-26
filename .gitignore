@@ -35,6 +35,9 @@ pids
 *.seed
 *.pid.lock
 
+# TypeScript build cache
+*.tsbuildinfo
+
 # Coverage
 coverage/
 .nyc_output/
