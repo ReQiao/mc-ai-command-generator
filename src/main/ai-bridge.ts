@@ -14,52 +14,73 @@
 
 import type { CommandIntent } from "../shared/logic/dispatch";
 import type { GiveVersion } from "../shared/logic/types";
+import { ENCHANTS, EFFECTS } from "../shared/data/catalog";
 
 const DEFAULT_ENDPOINT =
   process.env.DASHSCOPE_ENDPOINT ??
   "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions";
 const DEFAULT_MODEL = process.env.DASHSCOPE_MODEL ?? "qwen-plus";
 
+/** 从 catalog 动态生成附魔/药水效果参考表，注入系统提示。 */
+function buildCatalogRef(): string {
+  const enchantLines = (ENCHANTS as readonly (readonly [string, string, number, string])[])
+    .map(([id, zh, maxLv]) => `  ${id}（${zh}，最高${toRoman(maxLv)}级）`)
+    .join("\n");
+  const effectIds = (EFFECTS as readonly (readonly [string, string, ...unknown[]])[])
+    .map(([id, zh]) => `${id}(${zh})`)
+    .join(" ");
+  return `附魔完整列表（enchantments[].id 必须使用这里的 minecraft: id）：
+${enchantLines}
+
+药水效果完整列表（effect_give 的 effect 字段）：
+${effectIds}`;
+}
+
+function toRoman(n: number): string {
+  return ["", "I", "II", "III", "IV", "V"][n] ?? String(n);
+}
+
 /** 支持的指令清单——同时作为给 AI 的 schema 说明。 */
-const SUPPORTED_COMMANDS = `
+function buildSupportedCommands(): string {
+  return `
 你只能产出以下 command 类型的意图。target 选择器：@s=自己(默认) @a=所有玩家 @p=最近玩家 @r=随机玩家。
 
 - give {
     target?: "@s",
-    item: "英文物品id（如 bow / diamond_sword / arrow）",
+    item: "minecraft:物品id（如 minecraft:bow / minecraft:diamond_sword）",
     count?: number,
-    enchantments?: [ { id: "附魔英文id", level: 数字 } ],
+    enchantments?: [ { id: "minecraft:附魔id（见下方列表）", level: 数字 } ],
     displayName?: [ [ { text: "名称", color?: "gold|red|..." } ] ],
     lore?: [ [ { text: "描述行" } ] ],
     unbreakable?: true
   }
-  常用附魔id：power sharpness efficiency fortune silk_touch unbreaking mending infinity
-              protection fire_protection feather_falling aqua_affinity respiration
-              looting knockback flame punch smite bane_of_arthropods piercing multishot quick_charge
   注意：原版弓无法射出 TNT，但可以附魔 power(力量)、punch(冲击)、flame(火焰)、infinity(无限)
 
 - say         { message: string }
-- effect_give { target: string, effect: "speed|strength|resistance|...", duration?: number|"infinite", amplifier?: number }
+- effect_give { target: string, effect: "minecraft:效果id（见下方列表）", duration?: number|"infinite", amplifier?: number }
 - effect_clear{ target: string, effect?: string }
 - tp          { targets: string, x: string, y: string, z: string } 或 { targets: string, destination: string }
-- setblock    { x: string, y: string, z: string, block: "stone", blockstate?: "axis=x", mode?: "replace"|"keep"|"destroy" }
-- summon      { entityType: "pig|zombie|...", x?, y?, z?, noAI?, silent?, customName? }
-- fill        { from: [x,y,z], to: [x,y,z], block: "stone", mode?: "replace"|"keep"|"destroy" }
-- enchant     { targets: string, enchantment: "sharpness", level?: number }
+- setblock    { x: string, y: string, z: string, block: "minecraft:stone", blockstate?: "axis=x", mode?: "replace"|"keep"|"destroy" }
+- summon      { entityType: "minecraft:pig|minecraft:zombie|...", x?, y?, z?, noAI?, silent?, customName? }
+- fill        { from: [x,y,z], to: [x,y,z], block: "minecraft:stone", mode?: "replace"|"keep"|"destroy" }
+- enchant     { targets: string, enchantment: "minecraft:sharpness", level?: number }
 - execute     { subcommands: [...], run?: string }
 - scoreboard  { action: { kind: "objectives_add"|"players_set"|..., ...字段 } }
 
 坐标统一用字符串，支持绝对("0")、相对("~"/"~1")、本地("^"/"^1")。
-一个需求可拆成多条意图。`;
+一个需求可拆成多条意图。
+
+${buildCatalogRef()}`;
+}
 
 function systemPrompt(version: GiveVersion): string {
   return [
     "你是 Minecraft 指令生成助手。把用户的自然语言需求拆解成一组结构化指令意图。",
     `目标版本: ${version}。`,
-    SUPPORTED_COMMANDS,
+    buildSupportedCommands(),
     "",
     "只输出 JSON 对象，形如：",
-    '{ "intents": [ { "command": "give", "form": { "item": "钻石剑", "count": 1 } } ], "explanation": "一句话中文说明" }',
+    '{ "intents": [ { "command": "give", "form": { "item": "minecraft:diamond_sword", "count": 1, "enchantments": [{"id":"minecraft:sharpness","level":5}] } } ], "explanation": "一句话中文说明" }',
     "不要输出任何 JSON 以外的内容，不要拼写最终命令字符串（命令由本地确定性构建器生成）。",
   ].join("\n");
 }
