@@ -20,20 +20,37 @@ const DEFAULT_ENDPOINT =
   "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions";
 const DEFAULT_MODEL = process.env.DASHSCOPE_MODEL ?? "qwen-plus";
 
-/** 支持的指令清单（P1）——同时作为给 AI 的 schema 说明。 */
+/** 支持的指令清单——同时作为给 AI 的 schema 说明。 */
 const SUPPORTED_COMMANDS = `
-你只能产出以下 command 类型的意图，每条 form 字段如下（缺省字段会用合理默认值补全）：
+你只能产出以下 command 类型的意图。target 选择器：@s=自己(默认) @a=所有玩家 @p=最近玩家 @r=随机玩家。
 
-- give        { target?: "@a", item: "中文或英文物品名", count?: number, ...组件 }
+- give {
+    target?: "@s",
+    item: "英文物品id（如 bow / diamond_sword / arrow）",
+    count?: number,
+    enchantments?: [ { id: "附魔英文id", level: 数字 } ],
+    displayName?: [ [ { text: "名称", color?: "gold|red|..." } ] ],
+    lore?: [ [ { text: "描述行" } ] ],
+    unbreakable?: true
+  }
+  常用附魔id：power sharpness efficiency fortune silk_touch unbreaking mending infinity
+              protection fire_protection feather_falling aqua_affinity respiration
+              looting knockback flame punch smite bane_of_arthropods piercing multishot quick_charge
+  注意：原版弓无法射出 TNT，但可以附魔 power(力量)、punch(冲击)、flame(火焰)、infinity(无限)
+
 - say         { message: string }
-- effect_give { target: string, effect: "minecraft:speed", duration?: number|"infinite", amplifier?: number, hideParticles?: boolean }
+- effect_give { target: string, effect: "speed|strength|resistance|...", duration?: number|"infinite", amplifier?: number }
 - effect_clear{ target: string, effect?: string }
-- tp          坐标式 { targets: string, x: string, y: string, z: string, yRot?, xRot? }
-              或实体式 { targets: string, destination: string }
-- setblock    { x: string, y: string, z: string, block: "minecraft:stone", blockstate?: "axis=x", mode?: "replace"|"keep"|"destroy" }
-- summon      { entityType: "minecraft:pig", x?, y?, z?, noAI?, silent?, customName? }
+- tp          { targets: string, x: string, y: string, z: string } 或 { targets: string, destination: string }
+- setblock    { x: string, y: string, z: string, block: "stone", blockstate?: "axis=x", mode?: "replace"|"keep"|"destroy" }
+- summon      { entityType: "pig|zombie|...", x?, y?, z?, noAI?, silent?, customName? }
+- fill        { from: [x,y,z], to: [x,y,z], block: "stone", mode?: "replace"|"keep"|"destroy" }
+- enchant     { targets: string, enchantment: "sharpness", level?: number }
+- execute     { subcommands: [...], run?: string }
+- scoreboard  { action: { kind: "objectives_add"|"players_set"|..., ...字段 } }
 
-坐标统一用字符串，支持绝对("0")、相对("~"/"~1")、本地("^"/"^1")。`;
+坐标统一用字符串，支持绝对("0")、相对("~"/"~1")、本地("^"/"^1")。
+一个需求可拆成多条意图。`;
 
 function systemPrompt(version: GiveVersion): string {
   return [
