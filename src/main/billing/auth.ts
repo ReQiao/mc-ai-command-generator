@@ -15,9 +15,9 @@ export interface AuthState {
 }
 
 const state: AuthState = {
-  activated: false,
-  licenseKey: null,
-  balance: 0,
+  activated: true,
+  licenseKey: "builtin",
+  balance: 9999,
 };
 
 /**
@@ -43,4 +43,8 @@ export function getState(): AuthState {
 
 export function isActivated(): boolean {
   return state.activated;
+}
+
+export function decreaseBalance(by = 1): void {
+  state.balance = Math.max(0, state.balance - by);
 }
