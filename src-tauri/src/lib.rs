@@ -6,6 +6,7 @@
 mod ai;
 mod billing;
 mod mod_bridge;
+mod datapack;
 
 use billing::Billing;
 
@@ -24,6 +25,8 @@ pub fn run() {
             mod_bridge::mod_ping,
             mod_bridge::mod_send,
             mod_bridge::mod_place_block,
+            datapack::datapack_list_saves,
+            datapack::datapack_deploy,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

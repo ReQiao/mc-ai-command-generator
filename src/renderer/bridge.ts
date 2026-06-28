@@ -29,6 +29,18 @@ export interface ModResponse {
   isOp?: boolean;
 }
 
+export interface SaveInfo {
+  name: string;
+  path: string;
+}
+
+export interface DeployResult {
+  ok: boolean;
+  message?: string;
+  reloaded: boolean;
+  clipboardFallback?: string;
+}
+
 interface AiResponse {
   ok: boolean;
   content?: string;
@@ -98,6 +110,13 @@ export const mcai = {
 
   /** 读取账号/余额状态。 */
   billingState: () => invoke<BillingState>("billing_state"),
+
+  /** 获取可用的 Minecraft 存档列表。 */
+  listSaves: () => invoke<SaveInfo[]>("datapack_list_saves"),
+
+  /** 部署 datapack 到指定存档。 */
+  deployDatapack: (savePath: string, commands: string[], version: string) =>
+    invoke<DeployResult>("datapack_deploy", { save_path: savePath, commands, version }),
 };
 
 export type McaiApi = typeof mcai;
