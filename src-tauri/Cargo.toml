@@ -15,7 +15,7 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = [] }
+tauri = { version = "2", features = ["dialog-open"] }
 tauri-plugin-opener = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
@@ -23,3 +23,7 @@ serde_json = "1"
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
 # 启动时加载项目根目录的 .env（DASHSCOPE_API_KEY 等）
 dotenvy = "0.15"
+# 跨平台获取用户主目录
+dirs = "5"
+# 文件操作
+tokio = { version = "1", features = ["fs"] }
