@@ -42,6 +42,10 @@ pids
 coverage/
 .nyc_output/
 
+# Tauri (Rust 后端)
+src-tauri/target/
+src-tauri/gen/
+
 # Gradle (Mod)
 mod/.gradle/
 mod/build/

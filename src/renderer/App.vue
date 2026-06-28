@@ -1,12 +1,8 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import type { GiveVersion } from "../shared/logic/types";
-
-interface DispatchResult {
-  intent: { command: string; form: Record<string, unknown> };
-  command: string | null;
-  error: string | null;
-}
+import type { DispatchResult } from "../shared/logic/dispatch";
+import { mcai } from "./bridge";
 
 const VERSIONS: { value: GiveVersion; label: string }[] = [
   { value: "java_1_21_11_plus", label: "Java 1.21.11+" },
@@ -29,9 +25,9 @@ const toastMsg = ref("");
 let toastTimer: ReturnType<typeof setTimeout> | null = null;
 
 async function refreshState() {
-  const s = await window.mcai.billingState();
+  const s = await mcai.billingState();
   balance.value = s.balance;
-  const ping = await window.mcai.pingMod();
+  const ping = await mcai.pingMod();
   modOnline.value = ping.ok;
 }
 
@@ -43,7 +39,7 @@ async function generate() {
   explanation.value = "";
   loading.value = true;
   try {
-    const res = await window.mcai.generate(input.value, version.value, apiKey.value || undefined);
+    const res = await mcai.generate(input.value, version.value, apiKey.value || undefined);
     if (!res.ok) {
       error.value = res.error;
       return;
@@ -61,7 +57,7 @@ async function generate() {
 async function sendAll() {
   const cmds = results.value.map((r) => r.command).filter((c): c is string => !!c);
   if (!cmds.length) return;
-  const res = await window.mcai.sendToMod(cmds);
+  const res = await mcai.sendToMod(cmds);
   const failed = res.filter((r: any) => !r.ok);
   if (failed.length) {
     error.value = `下发 Mod 失败 ${failed.length}/${res.length} 条：${failed[0]?.message ?? ""}`;
